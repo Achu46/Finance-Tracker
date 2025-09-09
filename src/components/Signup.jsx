@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { db } from "../Firebase"; // import firebase config
-import { collection, addDoc } from "firebase/firestore";
+import { auth, db } from "../Firebase"; // import firebase config
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import "../styles/signup.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import bcrypt from "bcryptjs";
-import { query, where, getDocs } from "firebase/firestore";
+// import { query, where, getDocs } from "firebase/firestore";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -23,53 +24,59 @@ const Signup = () => {
   };
 
   const handleSubmit = async () => {
+    // Validation
     if (formData.password !== formData.confirmPassword) {
       toast.error("⚠️ Password Mismatch");
       return;
     }
 
-    const hashedPassword=await bcrypt.hash(formData.password, 10);
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const phoneRegex = /^(?:\+91|0)?[6-9]\d{9}$/;
+
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Invalid email format");
+      return;
+    }
+
+    if (!passwordRegex.test(formData.password)) {
+      toast.error(
+        "Password must have 8+ chars, 1 uppercase, 1 number & 1 special char"
+      );
+      return;
+    }
+
+    if (!phoneRegex.test(formData.mobile)) {
+      toast.error("Enter valid 10-digit mobile number");
+      return;
+    }
 
     try {
-      // 1. Email check
-      const emailQuery = query(
-        collection(db, "users"),
-        where("email", "==", formData.email)
+      // 1. Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
       );
-      const emailSnapshot = await getDocs(emailQuery);
+      const user = userCredential.user;
 
-      if (!emailSnapshot.empty) {
-        toast.error("❌ Email already exists!");
-        return;
-      }
+      const hashedPassword=await bcrypt.hash(formData.password, 10);
 
-      // 2. Mobile check
-      const mobileQuery = query(
-        collection(db, "users"),
-        where("mobile", "==", formData.mobile)
-      );
-      const mobileSnapshot = await getDocs(mobileQuery);
-
-      if (!mobileSnapshot.empty) {
-        toast.error("❌ Mobile number already exists!");
-        return;
-      }
-
-      // 3. If not exists → Insert
-      await addDoc(collection(db, "users"), {
+      // 2. Save extra details in Firestore (users collection)
+      await setDoc(doc(db, "users", user.uid), {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         mobile: formData.mobile,
-        password: hashedPassword, // NOTE: hash pannala! (production la hash pannanum)
+        password: hashedPassword,
         createdAt: new Date(),
       });
 
-      console.log("Data Inserted Successfully");
-      toast.success("🍾 Signup successful!");
+      toast.success("🎉 Signup successful!");
     } catch (error) {
-      console.error("Error: ", error);
-      toast.error("😭 Something went wrong");
+      console.error("Signup Error: ", error);
+      toast.error("Account Already exists");
     }
   };
   // Generate random stars
@@ -192,7 +199,7 @@ const Signup = () => {
             </label>
           </div>
           <p className="mb-3 text-white">
-            Already have an account? <Link to="#">Login</Link>
+            Already have an account? <Link to="/login">Login</Link>
           </p>
           <button
             onClick={handleSubmit}

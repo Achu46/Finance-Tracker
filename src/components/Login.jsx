@@ -46,7 +46,7 @@ const Login = () => {
       );
 
       toast.success("✅ Login successful!");
-      navigate("/dashboard");
+      navigate("/home");
     } catch (error) {
       console.error("Login error:", error);
       if (error.code === "auth/user-not-found") {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { auth, db } from "../Firebase"; // import firebase config
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -7,6 +7,8 @@ import "../styles/signup.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import bcrypt from "bcryptjs";
+import { serverTimestamp } from "firebase/firestore";
+
 // import { query, where, getDocs } from "firebase/firestore";
 
 const Signup = () => {
@@ -18,6 +20,8 @@ const Signup = () => {
     password: "",
     confirmPassword: "",
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -53,33 +57,31 @@ const Signup = () => {
     }
 
     try {
-      // 1. Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
         formData.password
       );
       const user = userCredential.user;
+      const hashedPassword = await bcrypt.hash(formData.password, 10);
 
-      const hashedPassword=await bcrypt.hash(formData.password, 10);
-
-      // 2. Save extra details in Firestore (users collection)
       await setDoc(doc(db, "users", user.uid), {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         mobile: formData.mobile,
         password: hashedPassword,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(), // 👈 Correct way
       });
 
       toast.success("🎉 Signup successful!");
+      navigate("/home");
     } catch (error) {
       console.error("Signup Error: ", error);
       toast.error("Account Already exists");
     }
   };
-  // Generate random stars
+
   const starCount = 150;
   const stars = Array.from({ length: starCount }, () => ({
     top: `${Math.random() * 100}%`,

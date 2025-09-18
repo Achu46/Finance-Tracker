@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyDDfRJxwQ7nfXegTxUgR-pYpcq0fBVAfOw",
   authDomain: "finance-tracker-achu.firebaseapp.com",

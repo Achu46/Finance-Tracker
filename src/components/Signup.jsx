@@ -20,7 +20,7 @@ const Signup = () => {
     password: "",
     confirmPassword: "",
   });
-
+  const name=formData.firstName
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -75,7 +75,7 @@ const Signup = () => {
       });
 
       toast.success("🎉 Signup successful!");
-      navigate("/home");
+      navigate("/home",{state:{name}});
     } catch (error) {
       console.error("Signup Error: ", error);
       toast.error("Account Already exists");

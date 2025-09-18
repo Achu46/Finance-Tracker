@@ -14,11 +14,23 @@
     justify-content: center;
 }
 
+.nav-elements{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-elements span{
+    font-size: xx-large;
+}
+
 .header-section{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     padding: 8%;
+    gap: 50px;
 }
 
 .amount{
@@ -26,7 +38,8 @@
     color: antiquewhite;
     padding:20px 20px;
     border-radius: 20px;
-    width: 30% ;
+    width: 100% ;
+    gap: 50px;
     box-shadow: 0px 3px 10px 0px grey;
 }
 
@@ -118,4 +131,14 @@
     color: navy;
     transition: 1s;
     box-shadow: 0px 0px 10px 0px navy;
+}
+
+@media (max-width:768px){
+    .header-section{
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+        justify-content: center;
+        align-items: center;
+    }
 }

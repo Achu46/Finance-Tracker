@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../styles/TransactionForm.css";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../Firebase";
+import { useLocation } from "react-router-dom";
 
 const TransactionForm = () => {
   const [showForm, setShowForm] = useState(false);
@@ -15,6 +16,8 @@ const TransactionForm = () => {
     date: "",
   });
 
+  const location = useLocation();
+  const { name } = location.state || {};
   const balance = totalIncome - totalExpense;
 
   const handleChange = (e) => {
@@ -96,8 +99,11 @@ const TransactionForm = () => {
   return (
     <>
       <nav className="nav-bar">
-        <section>
+        <section className="nav-elements">
           <h4>Personal Finance-Tracker</h4>
+          <span>
+            Hello, <strong>{name}</strong>
+          </span>
         </section>
       </nav>
 
